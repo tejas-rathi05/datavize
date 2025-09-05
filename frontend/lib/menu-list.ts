@@ -1,3 +1,5 @@
+import { DashboardSquare01Icon, DatabaseIcon, Message02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIconProps } from "@hugeicons/react";
 import {
   Tag,
   Users,
@@ -22,7 +24,7 @@ type Menu = {
   href: string;
   label: string;
   active?: boolean;
-  icon: LucideIcon;
+  icon: any;
   submenus?: Submenu[];
 };
 
@@ -39,23 +41,18 @@ export function getMenuList(pathname: string): Group[] {
         {
           href: "/dashboard",
           label: "Dashboard",
-          icon: LayoutGrid,
+          icon: DashboardSquare01Icon,
           submenus: []
         },
         {
           href: "/chat",
           label: "Chat",
-          icon: MessageSquareText,
+          icon: Message02Icon,
         },
         {
           href: "/agents/knowledge",
           label: "Knowledge Base",
-          icon: Database
-        },
-        {
-          href: "/workflows",
-          label: "Workflows",
-          icon: AudioWaveform
+          icon: DatabaseIcon
         }
       ]
     },

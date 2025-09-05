@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Loader2, Sparkles, Brain, Search, Lightbulb, CheckCircle, Clock } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Loading03Icon } from '@hugeicons/core-free-icons';
 import { useChatStore } from '@/hooks/use-chat-store';
 import { ChatMessage, ThinkingStep } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -38,6 +40,7 @@ export function ChatInterface() {
     sendMessage,
     clearMessages,
     currentSessionId,
+    addMessage,
   } = useChatStore();
 
   const [inputValue, setInputValue] = useState('');
@@ -121,7 +124,7 @@ export function ChatInterface() {
                 {/* Message Content */}
                 <div className={`flex-1 max-w-2xl ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
                   <div
-                    className={`inline-block p-4 rounded-2xl ${
+                    className={`inline-block p-2 rounded-full ${
                       message.role === 'user'
                         ? 'bg-blue-500 text-white'
                         : 'bg-muted text-foreground'
@@ -129,11 +132,6 @@ export function ChatInterface() {
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
-                  
-                  {/* Timestamp */}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {formatTime(message.timestamp)}
-                  </p>
 
                   {/* Thinking Steps for Assistant Messages */}
                   {message.role === 'assistant' && message.thinkingSteps && (
@@ -163,12 +161,13 @@ export function ChatInterface() {
             ))}
           </AnimatePresence>
 
-          {/* Current Thinking Step Indicator */}
-          {currentThinkingStep && (
+          {/* AI Thinking Indicator - Outside message squares */}
+          {(isLoading || currentThinkingStep) && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex gap-4 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex gap-4 max-w-2xl mx-auto mb-4"
             >
               <Avatar className="w-8 h-8">
                 <Bot className="w-4 h-4" />
@@ -180,14 +179,14 @@ export function ChatInterface() {
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     >
-                      <Loader2 className="w-5 h-5 text-muted-foreground" />
+                      <HugeiconsIcon icon={Loading03Icon} size={20} className="text-muted-foreground" />
                     </motion.div>
                     <div>
                       <p className="font-medium text-sm">
-                        {currentThinkingStep.title}
+                        {currentThinkingStep ? currentThinkingStep.title : "AI is thinking..."}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {currentThinkingStep.description}
+                        {currentThinkingStep ? currentThinkingStep.description : "Processing your request"}
                       </p>
                     </div>
                   </div>
@@ -198,8 +197,7 @@ export function ChatInterface() {
 
           {/* Typing Indicator */}
           <TypingIndicator 
-            isVisible={isTyping || isLoading} 
-            message={isTyping ? "AI is typing..." : "AI is thinking..."}
+            isStreaming={isTyping || isLoading}
           />
 
           <div ref={messagesEndRef} />

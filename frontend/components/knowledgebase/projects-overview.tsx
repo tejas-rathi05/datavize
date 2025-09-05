@@ -11,6 +11,8 @@ import CreateProjectDialog from "./dialogs/create-project";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Plus } from "lucide-react";
 import ProjectCardSkeleton from "./project-card-skeleton";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { RefreshIcon } from "@hugeicons/core-free-icons";
 
 const ProjectsOverview: React.FC = () => {
   const {
@@ -120,7 +122,8 @@ const ProjectsOverview: React.FC = () => {
             onClick={refreshProjects}
             disabled={loading}
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <HugeiconsIcon icon={RefreshIcon} size={20} className={loading ? 'animate-spin' : ''} />
+            {/* <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> */}
             Refresh
           </Button>
         </div>

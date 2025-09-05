@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Folder01Icon } from "@hugeicons/core-free-icons";
 
 interface ProjectCardProps {
   project: Project;
@@ -97,7 +99,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-between gap-5">
             <div className="bg-background p-5 rounded-xl">
-              <FolderOpen className="h-10 w-10 text-primary" />
+              <HugeiconsIcon icon={Folder01Icon} size={32} className="text-primary" />
+              {/* <FolderOpen className="h-10 w-10 text-primary" /> */}
             </div>
             <div className="flex flex-col items-center gap-5">
               <div>

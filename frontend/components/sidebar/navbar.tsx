@@ -11,8 +11,8 @@ interface NavbarProps {
 
 export function Navbar({ title, showContextToggle = false, contextType = "chat" }: NavbarProps) {
   return (
-    <header className="w-full bg-background h-16 border-b">
-      <div className="flex px-3 md:px-4 items-center">
+    <header className="w-full flex justify-end bg-background h-16 border-b">
+      <div className="w-full flex px-3 md:px-4 items-center justify-between">
         <div className="flex items-center space-x-4 lg:space-x-0">
           <SheetMenu />
           <h1 className="font-bold">{title}</h1>

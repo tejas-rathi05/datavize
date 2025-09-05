@@ -40,13 +40,13 @@ export default function ChatListPage() {
       title="" 
       showContextToggle={true}
       contextType="chat"
-      className="pt-[66px]"
+      className="pt-20"
     >
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Your Conversations</h1>
+            <h1 className="text-5xl font-bold mb-2">Your Conversations</h1>
             <p className="text-muted-foreground">
               Continue where you left off or start a new conversation
             </p>

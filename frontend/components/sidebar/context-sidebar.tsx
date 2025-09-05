@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   X,
-  MessageSquare,
   FileText,
   Database,
   Settings,
@@ -19,6 +18,8 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon, Delete02Icon, Edit03Icon, Message01Icon, PlusSignIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 export function ContextSidebar() {
   const contextSidebar = useStore(useContextSidebar, (x) => x);
@@ -91,8 +92,8 @@ export function ContextSidebar() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 h-16 border-b border-r">
         <div className="flex items-center gap-2 text-xl font-bold">
-          {contextType === "chat" && <MessageSquare className="h-5 w-5" />}
-          {contextType === "knowledge" && <Database className="h-5 w-5" />}
+          {contextType === "chat"}
+          {contextType === "knowledge"}
           {contextType === "files" && <FileText className="h-5 w-5" />}
           <h3 className="font-semibold capitalize">
             {contextType || "Context"}
@@ -115,14 +116,16 @@ export function ContextSidebar() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium text-sm">Chat History</h4>
-                <Button onClick={handleNewChat} size="sm" className="h-8 px-3">
-                  <Plus className="h-4 w-4" />
+                <Button onClick={handleNewChat} size="sm" className="px-3">
+                  <HugeiconsIcon icon={PlusSignIcon} size={18} strokeWidth={2}/>
+                  {/* <Plus className="h-4 w-4" /> */}
                 </Button>
               </div>
 
               {chats.length === 0 ? (
                 <div className="text-center py-8">
-                  <MessageSquare className="h-12 text-muted-foreground mx-auto mb-3" />
+                  <HugeiconsIcon icon={Message01Icon} size={18} strokeWidth={2}/>
+                  {/* <MessageSquare className="h-12 text-muted-foreground mx-auto mb-3" /> */}
                   <p className="text-sm text-muted-foreground mb-3">
                     No chats yet
                   </p>
@@ -162,7 +165,7 @@ export function ContextSidebar() {
                               className="h-6 w-6 p-0"
                               onClick={handleSaveEdit}
                             >
-                              ✓
+                              <HugeiconsIcon icon={Tick02Icon} size={18} strokeWidth={2}/>
                             </Button>
                             <Button
                               size="sm"
@@ -170,7 +173,7 @@ export function ContextSidebar() {
                               className="h-6 w-6 p-0"
                               onClick={handleCancelEdit}
                             >
-                              ✕
+                              <HugeiconsIcon icon={Cancel01Icon} size={18} strokeWidth={2}/>
                             </Button>
                           </div>
                         ) : (
@@ -194,7 +197,8 @@ export function ContextSidebar() {
                             handleStartEdit(chat);
                           }}
                         >
-                          <Edit className="h-3 w-3" />
+                          <HugeiconsIcon icon={Edit03Icon} size={16} />
+                          {/* <Edit className="h-3 w-3" /> */}
                         </Button>
                         <Button
                           size="sm"
@@ -205,7 +209,8 @@ export function ContextSidebar() {
                             handleDeleteChat(chat.id);
                           }}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <HugeiconsIcon icon={Delete02Icon} size={16} />
+                          {/* <Trash2 className="h-3 w-3" /> */}
                         </Button>
                       </div>
                     </div>

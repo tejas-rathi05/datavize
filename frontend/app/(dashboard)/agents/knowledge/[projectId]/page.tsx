@@ -19,9 +19,7 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import {
   ArrowLeft,
   FolderOpen,
-  FileText,
   Calendar,
-  HardDrive,
   MoreVertical,
   Upload,
   Download,
@@ -69,6 +67,8 @@ import { useProjects } from "@/hooks/use-projects";
 import { useAuthContext } from "@/components/providers/auth-provider";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Calendar04Icon, Clock01Icon, Delete02Icon, Download01Icon, Edit03Icon, File01Icon, HardDriveIcon, Upload01Icon } from "@hugeicons/core-free-icons";
 
 const ViewProjectPage = () => {
   const params = useParams();
@@ -381,7 +381,8 @@ const ViewProjectPage = () => {
     }
     
     // Default file icon
-    return <FileText className="h-5 w-5 text-gray-500" />;
+    return <HugeiconsIcon icon={File01Icon} size={20} className="text-gray-500" />;
+    // return <FileText className="h-5 w-5 text-gray-500" />;
   };
 
   if (loading) {
@@ -449,21 +450,24 @@ const ViewProjectPage = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="default" size="lg">
-                  <MoreVertical className="h-4 w-4 mr-2" />
+                  <MoreVertical className="h-3 w-3 mr-1" />
                   Actions
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleEditProject}>
-                  <Edit className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={Edit03Icon} size={20} className="mr-2" strokeWidth={2}/>
+                  {/* <Edit className="mr-2 h-4 w-4" /> */}
                   Edit Project
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Upload className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={Upload01Icon} size={20} className="mr-2" strokeWidth={2}/>
+                  {/* <Upload className="mr-2 h-4 w-4" /> */}
                   Upload Files
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={Download01Icon} size={20} className="mr-2" strokeWidth={2}/>
+                  {/* <Download className="mr-2 h-4 w-4" /> */}
                   Export Project
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -471,7 +475,8 @@ const ViewProjectPage = () => {
                   onClick={handleDeleteProject}
                   className="text-red-600"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={Delete02Icon} size={20} className="mr-2 text-red-600" strokeWidth={2}/>
+                  {/* <Trash2 className="mr-2 h-4 w-4" /> */}
                   Delete Project
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -485,7 +490,8 @@ const ViewProjectPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-100 p-4 rounded-lg">
-                  <FileText className="h-6 w-6 text-blue-600" />
+                  <HugeiconsIcon icon={File01Icon} size={28} className="text-blue-600" />
+                  {/* <FileText className="h-6 w-6 text-blue-600" /> */}
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Files</p>
@@ -499,7 +505,8 @@ const ViewProjectPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="bg-green-100 p-4 rounded-lg">
-                  <HardDrive className="h-6 w-6 text-green-600" />
+                  <HugeiconsIcon icon={HardDriveIcon} size={28} className="text-green-600" />
+                  {/* <HardDrive className="h-6 w-6 text-green-600" /> */}
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Size</p>
@@ -513,7 +520,8 @@ const ViewProjectPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="bg-purple-100 p-4 rounded-lg">
-                  <Calendar className="h-6 w-6 text-purple-600" />
+                  <HugeiconsIcon icon={Calendar04Icon} size={28} className="text-purple-600" />
+                  {/* <Calendar className="h-6 w-6 text-purple-600" /> */}
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Created</p>
@@ -527,7 +535,8 @@ const ViewProjectPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="bg-orange-100 p-4 rounded-lg">
-                  <Clock className="h-6 w-6 text-orange-600" />
+                  <HugeiconsIcon icon={Clock01Icon} size={28} className="text-orange-600" />
+                  {/* <Clock className="h-6 w-6 text-orange-600" /> */}
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Updated</p>
@@ -557,7 +566,7 @@ const ViewProjectPage = () => {
                       Manage and organize your project files
                     </CardDescription>
                   </div>
-                  <Button size="sm" onClick={() => setShowUploadDialog(true)}>
+                  <Button size="lg" onClick={() => setShowUploadDialog(true)}>
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Files
                   </Button>
@@ -612,7 +621,8 @@ const ViewProjectPage = () => {
                 {/* Files List */}
                 {filteredAndSortedFiles.length === 0 ? (
                   <div className="text-center py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <HugeiconsIcon icon={File01Icon} size={20} className="text-muted-foreground mx-auto mb-4" />
+                    {/* <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" /> */}
                     <p className="text-muted-foreground">
                       {searchQuery ? "No files match your search" : "No files uploaded yet"}
                     </p>

@@ -19,15 +19,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const KnowledgePage = () => {
   return (
     <ContentLayout 
-      maxWidth="full" 
       title=""
       showContextToggle={false}
       contextType="knowledge"
-      className="pt-16"
+      className="pt-20 px-6"
     >
       <div className="p-6">
         <div className="mb-8">
-          <h1 className="text-5xl font-extrabold mb-2">Knowledge Base</h1>
+          <h1 className="text-5xl font-bold mb-2">Knowledge Base</h1>
           <p className="text-muted-foreground">
             Store and analyze your documents with secure cloud storage
           </p>

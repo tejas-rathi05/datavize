@@ -9,6 +9,8 @@ import {
   HardDrive, 
   TrendingUp 
 } from "lucide-react";
+import { ArrowUp04Icon, File01Icon, Folder01Icon, HardDriveIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 interface ProjectStatsProps {
   projects: Project[];
@@ -32,28 +34,28 @@ const ProjectStats: React.FC<ProjectStatsProps> = ({ projects }) => {
     {
       title: "Total Projects",
       value: totalProjects,
-      icon: FolderOpen,
+      icon: Folder01Icon,
       description: "Active and archived projects",
       color: "text-blue-600"
     },
     {
       title: "Total Files",
       value: totalFiles.toLocaleString(),
-      icon: FileText,
+      icon: File01Icon,
       description: "Documents across all projects",
       color: "text-green-600"
     },
     {
       title: "Storage Used",
       value: formatBytes(totalSize),
-      icon: HardDrive,
+      icon: HardDriveIcon,
       description: "Total space occupied",
       color: "text-purple-600"
     },
     {
       title: "Active Projects",
       value: activeProjects,
-      icon: TrendingUp,
+      icon: ArrowUp04Icon,
       description: "Currently active projects",
       color: "text-orange-600"
     }
@@ -67,7 +69,8 @@ const ProjectStats: React.FC<ProjectStatsProps> = ({ projects }) => {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.title}
             </CardTitle>
-            <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            <HugeiconsIcon icon={stat.icon} size={20} className={stat.color} />
+            {/* <stat.icon className={`h-4 w-4 ${stat.color}`} /> */}
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">{stat.value}</div>

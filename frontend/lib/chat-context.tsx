@@ -311,95 +311,38 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     });
 
     try {
-
-      
-      // Call FastAPI backend with streaming
-      let response: Response;
-      
-      if (files && files.length > 0) {
-        // Use FormData for file uploads
-        const formData = new FormData();
-        formData.append("messages", JSON.stringify([{ role: "user", content }]));
-        formData.append("model", model);
-        formData.append("chatId", chatId);
-        formData.append("stream", "true");
-        
-        // Append all files
-        files.forEach(file => {
-          formData.append("files", file);
-        });
-        
-        response = await fetch("/api/chat/fastapi", {
-          method: "POST",
-          body: formData,
-        });
-      } else {
-        // Use JSON for text-only messages
-        response = await fetch("/api/chat/fastapi", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messages: [{ role: "user", content }],
-            model,
-            chatId,
-            stream: true,
-          }),
-        });
-      }
+      // Call FastAPI backend /ask endpoint
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: content,
+          session_id: chat.sessionId || null, // Use chat's session ID if available
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`FastAPI backend error: ${response.status} ${response.statusText}`);
       }
 
-      if (!response.body) {
-        throw new Error("No response body for streaming");
-      }
-
-
+      const data = await response.json();
       
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      // Update the assistant message with the response
+      updateMessage(assistantMessageId, {
+        content: data.answer,
+        isStreaming: false,
+        streamingStack: []
+      });
 
-      try {
-                while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
-          }
-
-          const chunk = decoder.decode(value, { stream: true });
-          
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') {
-                finishStreamingMessage(chatId, assistantMessageId);
-                break;
-              }
-
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.choices?.[0]?.delta?.content) {
-                  const newContent = parsed.choices[0].delta.content;
-                  
-                  // Push the chunk to the stack
-                  pushStreamingChunk(chatId, assistantMessageId, newContent);
-                  
-                  // Simulate processing delay for better visual effect
-                  await new Promise(resolve => setTimeout(resolve, 50));
-                }
-              } catch (e) {
-                continue;
-              }
-            }
-          }
-        }
-      } finally {
-        reader.releaseLock();
+      // Update chat with session ID if provided
+      if (data.session_id && !chat.sessionId) {
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === chatId ? { ...c, sessionId: data.session_id, updatedAt: Date.now() } : c
+          )
+        );
       }
 
       // Update chat model if it's different
@@ -411,11 +354,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         );
       }
     } catch (error) {
-      // Update the streaming message with error content
-      pushStreamingChunk(chatId, assistantMessageId, "Sorry, I encountered an error. Please try again.");
-      finishStreamingMessage(chatId, assistantMessageId);
+      // Update the assistant message with error content
+      updateMessage(assistantMessageId, {
+        content: "Sorry, I encountered an error. Please try again.",
+        isStreaming: false,
+        streamingStack: []
+      });
     }
-  }, [chats, addMessage, pushStreamingChunk, finishStreamingMessage]);
+  }, [chats, addMessage, updateMessage, setChats]);
 
   const deleteChat = React.useCallback((chatId: string) => {
     setChats((prev) => prev.filter((c) => c.id !== chatId));

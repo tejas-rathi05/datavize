@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Attachment02Icon, Copy01Icon, DatabaseIcon, ThumbsDownIcon, ThumbsUpIcon, Tick02Icon, Loading03Icon } from '@hugeicons/core-free-icons';
 import {
   Send,
   Plus,
   ArrowLeft,
   Trash2,
-  Copy,
   Check,
   Loader2,
   Database,
@@ -320,13 +321,13 @@ export default function ChatPage() {
 
                   <Card
                     className={cn(
-                      "max-w-[80%] relative",
+                      "max-w-[80%] relative rounded-3xl",
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground py-0 p-2"
                         : "bg-muted py-0 p-2"
                     )}
                   >
-                    <CardContent className="p-3">
+                    <CardContent className="p-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 streaming-content">
                           {msg.role === "assistant" ? (
@@ -366,12 +367,6 @@ export default function ChatPage() {
                             </div>
                           )}
 
-                          {/* Show typing indicator only when streaming */}
-                          {msg.isStreaming && (
-                            <div className="mt-2">
-                              <EnhancedTypingIndicator isStreaming={true} />
-                            </div>
-                          )}
                         </div>
                         <Button
                           variant="ghost"
@@ -385,15 +380,14 @@ export default function ChatPage() {
                           className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           {copiedId === msg.id ? (
-                            <Check className="w-3 h-3" />
+                            <HugeiconsIcon icon={Tick02Icon} size={18}/>
+                            // <Check className="w-3 h-3" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <HugeiconsIcon icon={Copy01Icon} size={18}/>
+                            // <Copy className="w-3 h-3" />
                           )}
                         </Button>
                       </div>
-                      <p className="text-xs opacity-70 mt-2">
-                        {new Date(msg.createdAt).toLocaleTimeString()}
-                      </p>
                     </CardContent>
                     {msg.role === "assistant" && (
                       <div className="absolute right-0 left-5 -bottom-7 flex gap-5 items-center justify-start text-muted-foreground">
@@ -402,15 +396,21 @@ export default function ChatPage() {
                             {copiedId === msg.id ? (
                               <Check className="w-4 h-4 text-green-500" />
                             ) : (
-                              <Copy
-                                className="w-4 h-4"
-                                onClick={() =>
+                              <HugeiconsIcon icon={Copy01Icon} size={18} onClick={() =>
                                   handleCopyMessage(
                                     getMessageDisplayContent(msg),
                                     msg.id
                                   )
-                                }
-                              />
+                                }/>
+                              // <Copy
+                              //   className="w-4 h-4"
+                              //   onClick={() =>
+                              //     handleCopyMessage(
+                              //       getMessageDisplayContent(msg),
+                              //       msg.id
+                              //     )
+                              //   }
+                              // />
                             )}
                           </div>
                           {/* Tooltip */}
@@ -418,8 +418,10 @@ export default function ChatPage() {
                             {copiedId === msg.id ? "Copied!" : "Copy"}
                           </div>
                         </div>
-                        <ThumbsUp className="w-4 h-4" />
-                        <ThumbsDown className="w-4 h-4" />
+                        <HugeiconsIcon icon={ThumbsUpIcon} size={18}/>
+                        <HugeiconsIcon icon={ThumbsDownIcon} size={18}/>
+                        {/* <ThumbsUp className="w-4 h-4" /> */}
+                        {/* <ThumbsDown className="w-4 h-4" /> */}
                       </div>
                     )}
                   </Card>
@@ -434,6 +436,27 @@ export default function ChatPage() {
                   )}
                 </div>
               ))}
+
+              {/* AI Thinking Indicator - Outside message squares */}
+              {sending && (
+                <div className="flex gap-3 justify-start mb-4">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src="/ai-avatar.png" />
+                    <AvatarFallback>AI</AvatarFallback>
+                  </Avatar>
+                  <div className="bg-muted/50 p-4 rounded-2xl border-2 border-dashed border-muted-foreground/30 max-w-[80%]">
+                    <div className="flex items-center gap-3">
+                      <div className="animate-spin">
+                        <HugeiconsIcon icon={Loading03Icon} size={20} className="text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">AI is thinking...</p>
+                        <p className="text-sm text-muted-foreground">Processing your request</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div ref={messagesEndRef} />
             </div>
@@ -577,11 +600,12 @@ export default function ChatPage() {
                     <div className="flex gap-2 items-center">
                       <Button
                         variant="ghost"
-                        className="rounded-full size-10 p-1"
+                        className="rounded-full"
                         title="Knowledge Base - Browse and select files to send to chat"
                         onClick={() => setIsKnowledgeBaseDialogOpen(true)}
                       >
-                        <Database className="size-5" />
+                        <HugeiconsIcon icon={DatabaseIcon}/>
+                        {/* <Database className="size-5" /> */}
                       </Button>
                       <div className="relative">
                         <input
@@ -605,7 +629,8 @@ export default function ChatPage() {
                             fileInputRef.current?.click();
                           }}
                         >
-                          <Paperclip className="size-5" />
+                          <HugeiconsIcon icon={Attachment02Icon}/>
+                          {/* <Paperclip className="size-5" /> */}
                           {attachedFiles.length > 0 && (
                             <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
                               {attachedFiles.length > 9

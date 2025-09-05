@@ -2,6 +2,8 @@ import { ChevronLeft, ChevronsRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ArrowRightDoubleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 interface SidebarToggleProps {
   isOpen: boolean | undefined;
@@ -16,7 +18,8 @@ export function SidebarToggle({ isOpen, setIsOpen }: SidebarToggleProps) {
       variant="outline"
     >
       <span className={cn(isOpen === false ? "transition-all transform rotate-360 ease-in" : "mr-4 transition-all transform rotate-180 ease-in")}>
-        <ChevronsRight size={18} />
+        <HugeiconsIcon icon={ArrowRightDoubleIcon} size={18} />
+        {/* <ChevronsRight size={18} /> */}
       </span>
       <p
         className={cn(
