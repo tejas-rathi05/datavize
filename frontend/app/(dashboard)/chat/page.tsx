@@ -170,13 +170,20 @@ export default function ChatListPage() {
             <li>• Get intelligent answers based on document content</li>
             <li>• Session-based document management</li>
           </ul>
-          <div className="mt-3">
+          <div className="mt-3 flex gap-2">
             <Button 
               variant="outline" 
               size="sm"
               onClick={() => router.push('/test-fastapi')}
             >
               Test FastAPI Integration
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => router.push('/chat-openrouter')}
+            >
+              OpenRouter Testing
             </Button>
           </div>
         </div>

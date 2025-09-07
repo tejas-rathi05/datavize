@@ -1,5 +1,3 @@
-import { DashboardSquare01Icon, DatabaseIcon, Message02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIconProps } from "@hugeicons/react";
 import {
   Tag,
   Users,
@@ -11,7 +9,10 @@ import {
   Database,
   AudioWaveform,
   MessageCircle,
-  MessageSquareText
+  MessageSquareText,
+  Zap,
+  LayoutDashboard,
+  MessageSquare
 } from "lucide-react";
 
 type Submenu = {
@@ -41,18 +42,18 @@ export function getMenuList(pathname: string): Group[] {
         {
           href: "/dashboard",
           label: "Dashboard",
-          icon: DashboardSquare01Icon,
+          icon: LayoutDashboard,
           submenus: []
         },
         {
           href: "/chat",
           label: "Chat",
-          icon: Message02Icon,
+          icon: MessageSquare,
         },
         {
           href: "/agents/knowledge",
           label: "Knowledge Base",
-          icon: DatabaseIcon
+          icon: Database
         }
       ]
     },

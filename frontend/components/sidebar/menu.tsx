@@ -20,7 +20,6 @@ import { useContextSidebar } from "@/hooks/use-context-sidebar";
 import { useStore } from "@/hooks/use-store";
 import { SidebarToggle } from "./sidebar-toggle";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { HugeiconsIcon } from "@hugeicons/react";
 
 interface MenuProps {
   isMenuOpen: boolean | undefined;
@@ -117,8 +116,7 @@ export function Menu({ isMenuOpen }: MenuProps) {
                                 <span
                                   className={cn(isOpen === false ? "" : "mr-4")}
                                 >
-                                  <HugeiconsIcon icon={Icon} size={24} strokeWidth={2}/>
-                                  {/* <Icon size={30} /> */}
+                                  <Icon size={24} />
                                 </span>
                                 <p
                                   className={cn(

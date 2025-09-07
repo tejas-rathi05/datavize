@@ -324,7 +324,7 @@ export default function ChatPage() {
                       "max-w-[80%] relative rounded-3xl",
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground py-0 p-2"
-                        : "bg-muted py-0 p-2"
+                        : "shadow-none border-none py-0 mb-5 px-2"
                     )}
                   >
                     <CardContent className="p-2">
@@ -444,7 +444,7 @@ export default function ChatPage() {
                     <AvatarImage src="/ai-avatar.png" />
                     <AvatarFallback>AI</AvatarFallback>
                   </Avatar>
-                  <div className="bg-muted/50 p-4 rounded-2xl border-2 border-dashed border-muted-foreground/30 max-w-[80%]">
+                  <div className="max-w-[80%]">
                     <div className="flex items-center gap-3">
                       <div className="animate-spin">
                         <HugeiconsIcon icon={Loading03Icon} size={20} className="text-muted-foreground" />

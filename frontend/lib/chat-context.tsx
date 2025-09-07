@@ -23,6 +23,7 @@ export type Chat = {
   title: string;
   messages: ChatMessage[];
   model?: string;
+  sessionId?: string; // Session ID from upload endpoint
   createdAt: number;
   updatedAt: number;
 };
@@ -311,7 +312,38 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     });
 
     try {
-      // Call FastAPI backend /ask endpoint
+      let sessionId = chat.sessionId; // Use existing session ID if available
+
+      // If files are attached, upload them first to get session ID
+      if (files && files.length > 0) {
+        const formData = new FormData();
+        files.forEach(file => {
+          formData.append('files', file);
+        });
+
+        const uploadResponse = await fetch("/api/upload/fastapi", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        }
+
+        const uploadData = await uploadResponse.json();
+        sessionId = uploadData.session_id;
+
+        // Update chat with new session ID
+        if (sessionId) {
+          setChats((prev) =>
+            prev.map((c) =>
+              c.id === chatId ? { ...c, sessionId, updatedAt: Date.now() } : c
+            )
+          );
+        }
+      }
+
+      // Call FastAPI backend /ask endpoint with session ID
       const response = await fetch("/api/ask", {
         method: "POST",
         headers: {
@@ -319,7 +351,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         },
         body: JSON.stringify({
           question: content,
-          session_id: chat.sessionId || null, // Use chat's session ID if available
+          session_id: sessionId || null,
         }),
       });
 
@@ -330,14 +362,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       
       // Update the assistant message with the response
-      updateMessage(assistantMessageId, {
+      updateMessage(chatId, assistantMessageId, {
         content: data.answer,
         isStreaming: false,
         streamingStack: []
       });
 
-      // Update chat with session ID if provided
-      if (data.session_id && !chat.sessionId) {
+      // Update chat with session ID if provided (in case it wasn't set from upload)
+      if (data.session_id && !sessionId) {
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId ? { ...c, sessionId: data.session_id, updatedAt: Date.now() } : c
@@ -354,8 +386,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         );
       }
     } catch (error) {
+      console.error('Error in sendMessage:', error);
       // Update the assistant message with error content
-      updateMessage(assistantMessageId, {
+      updateMessage(chatId, assistantMessageId, {
         content: "Sorry, I encountered an error. Please try again.",
         isStreaming: false,
         streamingStack: []
