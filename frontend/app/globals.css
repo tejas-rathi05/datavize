@@ -347,3 +347,36 @@
   @apply bg-muted/60;
 }
 
+/* Custom scrollbar styles for file containers */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.show-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  -ms-overflow-style: scrollbar; /* Internet Explorer 10+ */
+}
+
+.show-scrollbar::-webkit-scrollbar {
+  display: block; /* WebKit */
+  height: 6px;
+}
+
+.show-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.show-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.show-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+

@@ -1,19 +1,8 @@
 import {
-  Tag,
-  Users,
-  Settings,
-  Bookmark,
-  SquarePen,
-  LayoutGrid,
-  LucideIcon,
-  Database,
-  AudioWaveform,
-  MessageCircle,
-  MessageSquareText,
-  Zap,
-  LayoutDashboard,
-  MessageSquare
-} from "lucide-react";
+  DatabaseIcon,
+  MenuSquareIcon,
+  Message02Icon
+} from "@hugeicons/core-free-icons";
 
 type Submenu = {
   href: string;
@@ -42,18 +31,18 @@ export function getMenuList(pathname: string): Group[] {
         {
           href: "/dashboard",
           label: "Dashboard",
-          icon: LayoutDashboard,
+          icon: MenuSquareIcon,
           submenus: []
         },
         {
           href: "/chat",
           label: "Chat",
-          icon: MessageSquare,
+          icon: Message02Icon,
         },
         {
           href: "/agents/knowledge",
           label: "Knowledge Base",
-          icon: Database
+          icon: DatabaseIcon
         }
       ]
     },

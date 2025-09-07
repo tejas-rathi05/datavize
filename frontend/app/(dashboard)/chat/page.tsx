@@ -1,16 +1,37 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, MessageSquare, Calendar, Hash } from "lucide-react";
+import { Plus, MessageSquare, Calendar, Hash, MoreVertical, Share, Edit, Trash2 } from "lucide-react";
 import { useChat } from "@/lib/chat-context";
 import { ContentLayout } from "@/components/sidebar/content-layout";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ChatListPage() {
   const router = useRouter();
-  const { chats, selectChat } = useChat();
+  const { chats, selectChat, deleteChat, renameChat } = useChat();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   const handleNewChat = () => {
     router.push("/chat/new");
@@ -19,6 +40,49 @@ export default function ChatListPage() {
   const handleChatSelect = (chat: any) => {
     selectChat(chat.id);
     router.push(`/chat/${chat.slug}`);
+  };
+
+  const handleShareChat = async (chat: any) => {
+    const url = `${window.location.origin}/chat/${chat.slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      // You could add a toast notification here
+      console.log("Chat URL copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+    }
+  };
+
+  const handleEditChat = (chat: any) => {
+    setSelectedChat(chat);
+    setEditTitle(chat.title);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteChat = (chat: any) => {
+    setSelectedChat(chat);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (selectedChat && editTitle.trim()) {
+      renameChat(selectedChat.id, editTitle.trim());
+      setEditDialogOpen(false);
+      setSelectedChat(null);
+      setEditTitle("");
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedChat) {
+      deleteChat(selectedChat.id);
+      setDeleteDialogOpen(false);
+      setSelectedChat(null);
+    }
+  };
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking menu
   };
 
   const formatDate = (timestamp: number) => {
@@ -85,11 +149,45 @@ export default function ChatListPage() {
                     <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
                       {chat.title}
                     </CardTitle>
-                    {chat.model && (
-                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded whitespace-nowrap">
-                        {chat.model}
-                      </span>
-                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={handleMenuClick}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleShareChat(chat);
+                        }}>
+                          <Share className="mr-2 h-4 w-4" />
+                          Share
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditChat(chat);
+                        }}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteChat(chat);
+                          }}
+                          variant="destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -160,34 +258,61 @@ export default function ChatListPage() {
             ))}
           </div>
         </div>
-
-        {/* Integration Info */}
-        <div className="mt-8 p-4 bg-muted/50 rounded-lg">
-          <h3 className="font-semibold mb-2">📄 Document Processing Features</h3>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Upload PDF, DOCX, TXT, and other document formats</li>
-            <li>• Ask questions about your uploaded documents using AI</li>
-            <li>• Get intelligent answers based on document content</li>
-            <li>• Session-based document management</li>
-          </ul>
-          <div className="mt-3 flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => router.push('/test-fastapi')}
-            >
-              Test FastAPI Integration
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => router.push('/chat-openrouter')}
-            >
-              OpenRouter Testing
-            </Button>
-          </div>
-        </div>
       </div>
+
+      {/* Edit Chat Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Chat Title</DialogTitle>
+            <DialogDescription>
+              Change the title of your chat conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter chat title..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={!editTitle.trim()}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Chat Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Chat</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{selectedChat?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Delete Chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ContentLayout>
   );
 }

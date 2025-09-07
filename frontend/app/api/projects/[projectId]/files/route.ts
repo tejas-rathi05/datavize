@@ -230,6 +230,28 @@ export async function POST(
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
     const filePath = `${user.id}/${projectId}/${fileName}`
 
+    // Check if project-files bucket exists, create if not
+    const { data: buckets } = await supabase.storage.listBuckets()
+    const projectFilesBucket = buckets?.find(bucket => bucket.name === 'project-files')
+    
+    if (!projectFilesBucket) {
+      console.log('project-files bucket not found, creating it...')
+      const { error: createError } = await supabase.storage.createBucket('project-files', {
+        public: true,
+        allowedMimeTypes: null,
+        fileSizeLimit: null
+      })
+      
+      if (createError) {
+        console.error('Error creating bucket:', createError)
+        await prisma.$disconnect()
+        return NextResponse.json(
+          { error: 'Failed to create storage bucket: ' + createError.message },
+          { status: 500 }
+        )
+      }
+    }
+
     // Upload file to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('project-files')

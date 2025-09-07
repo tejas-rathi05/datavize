@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useStore } from "@/hooks/use-store";
 import { cn } from "@/lib/utils";
-import { PanelsTopLeft } from "lucide-react";
 import Link from "next/link";
 import { ContextSidebar } from "@/components/sidebar/context-sidebar";
 

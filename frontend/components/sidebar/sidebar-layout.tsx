@@ -42,21 +42,13 @@ export default function SidebarLayout({
       <Sidebar />
       <ContextSidebar />
       <main
-        className="min-h-[calc(100vh_-_56px)] bg-zinc-50 dark:bg-zinc-900 transition-[margin-left] ease-in-out duration-300"
+        className="h-screen bg-zinc-50 dark:bg-zinc-900 transition-[margin-left] ease-in-out duration-300 overflow-hidden"
         style={{
           marginLeft: getMainMargin()
         }}
       >
         {children}
       </main>
-      <footer
-        className="transition-[margin-left] ease-in-out duration-300"
-        style={{
-          marginLeft: getMainMargin()
-        }}
-      >
-        <Footer />
-      </footer>
     </>
   );
 }

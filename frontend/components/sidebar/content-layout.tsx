@@ -28,7 +28,7 @@ export function ContentLayout({
   children,
   maxWidth = "full",
   showContextToggle = false,
-  contextType = "chat",
+  contextType = "",
   className = "",
 }: ContentLayoutProps) {
   const maxWidthClasses = {
@@ -47,9 +47,9 @@ export function ContentLayout({
   };
 
   return (
-    <div className="relative">
-      {/* Navbar positioned absolutely above all content */}
-      <div className="absolute w-full top-0 left-0 right-0 z-10">
+    <div className="h-full flex flex-col">
+      {/* Sticky Navbar */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <Navbar 
           title={title} 
           showContextToggle={showContextToggle}
@@ -57,10 +57,10 @@ export function ContentLayout({
         />
       </div>
     
-      {/* Content positioned below navbar with top padding */}
+      {/* Content with proper spacing and overflow handling */}
       <div
         className={cn(
-          `${maxWidthClasses[maxWidth]} h-full`,
+          `${maxWidthClasses[maxWidth]} flex-1 min-h-0 overflow-hidden`,
           className
         )}
       >

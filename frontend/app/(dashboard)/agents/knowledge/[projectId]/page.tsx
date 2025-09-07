@@ -62,6 +62,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Project, ProjectFile } from "@/lib/types";
 import { useProjects } from "@/hooks/use-projects";
 import { useAuthContext } from "@/components/providers/auth-provider";
@@ -86,6 +93,11 @@ const ViewProjectPage = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showFilePreview, setShowFilePreview] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<ProjectFile | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
+  const [fileContentLoading, setFileContentLoading] = useState(false);
+  const [fileContentError, setFileContentError] = useState<string | null>(null);
 
   useEffect(() => {
     if (projects && projectId) {
@@ -93,6 +105,15 @@ const ViewProjectPage = () => {
       setProject(foundProject || null);
     }
   }, [projects, projectId]);
+
+  // Cleanup blob URLs when component unmounts or file changes
+  useEffect(() => {
+    return () => {
+      if (fileContent && (fileContent.startsWith('blob:') || fileContent.startsWith('data:'))) {
+        URL.revokeObjectURL(fileContent);
+      }
+    };
+  }, [fileContent]);
 
   const handleBackToProjects = () => {
     router.push("/agents/knowledge");
@@ -112,6 +133,107 @@ const ViewProjectPage = () => {
   const handleEditProject = () => {
     // TODO: Implement edit project functionality
     console.log("Edit project:", project);
+  };
+
+  const fetchFileContent = async (file: ProjectFile) => {
+    setFileContentLoading(true);
+    setFileContentError(null);
+    try {
+      console.log('Fetching file content for:', file.id, file.originalName);
+      
+      // Use the public URL directly from the file metadata
+      let publicUrl = file.metadata?.originalUrl || file.url;
+      
+      console.log('File metadata:', file.metadata);
+      console.log('File URL field:', file.url);
+      console.log('Available public URL:', publicUrl);
+      
+      // If no public URL is stored, try to generate one using the API
+      if (!publicUrl && file.filePath && user && session?.access_token) {
+        console.log('No stored public URL, generating from file path via API:', file.filePath);
+        try {
+          const urlResponse = await fetch(`/api/projects/${projectId}/files/${file.id}/public-url`, {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+          });
+          
+          if (urlResponse.ok) {
+            const urlData = await urlResponse.json();
+            publicUrl = urlData.publicUrl;
+            console.log('Generated public URL via API:', publicUrl);
+          } else {
+            console.error('Failed to generate public URL via API:', urlResponse.statusText);
+          }
+        } catch (urlError) {
+          console.error('Error generating public URL via API:', urlError);
+        }
+      }
+      
+      if (!publicUrl) {
+        console.error('No public URL available for file');
+        return null;
+      }
+      
+      console.log('Using public URL:', publicUrl);
+      
+      const response = await fetch(publicUrl);
+      
+      console.log('Response status:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file content: ${response.status} ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get('content-type') || file.mimeType || '';
+      console.log('Content type:', contentType);
+      
+      // Handle different file types
+      if (contentType.startsWith('image/')) {
+        // For images, create a blob URL
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        console.log('Created image blob URL:', imageUrl);
+        return imageUrl;
+      } else if (contentType === 'application/pdf') {
+        // For PDFs, create a blob URL
+        const blob = await response.blob();
+        const pdfUrl = URL.createObjectURL(blob);
+        console.log('Created PDF blob URL:', pdfUrl);
+        return pdfUrl;
+      } else if (contentType.startsWith('text/') || contentType.includes('json') || contentType.includes('xml')) {
+        // For text files, get the text content
+        const text = await response.text();
+        console.log('Fetched text content, length:', text.length);
+        return text;
+      } else {
+        // For other files, return null (will show unsupported message)
+        console.log('Unsupported content type:', contentType);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching file content:', error);
+      setFileContentError(error instanceof Error ? error.message : 'Failed to load file content');
+      return null;
+    } finally {
+      setFileContentLoading(false);
+    }
+  };
+
+  const handleViewFile = async (file: ProjectFile) => {
+    // Clean up previous blob URL if it exists
+    if (fileContent && (fileContent.startsWith('blob:') || fileContent.startsWith('data:'))) {
+      URL.revokeObjectURL(fileContent);
+    }
+    
+    setSelectedFile(file);
+    setShowFilePreview(true);
+    setFileContent(null);
+    setFileContentError(null);
+    
+    // Fetch file content
+    const content = await fetchFileContent(file);
+    setFileContent(content);
   };
 
   const handleFileUpload = async (files: FileList) => {
@@ -322,6 +444,119 @@ const ViewProjectPage = () => {
     }
   };
 
+  const isFileTypeSupported = (mimeType: string) => {
+    if (!mimeType) return false;
+    
+    const supportedTypes = [
+      'image/', // All image types
+      'application/pdf', // PDF files
+      'text/', // Text files
+      'application/json', // JSON files
+      'application/xml', // XML files
+      'text/html', // HTML files
+      'text/css', // CSS files
+      'text/javascript', // JavaScript files
+      'application/javascript', // JavaScript files
+    ];
+    
+    return supportedTypes.some(type => mimeType.startsWith(type));
+  };
+
+  const renderFileContent = (file: ProjectFile, content: string | null, loading: boolean, error: string | null) => {
+    if (loading) {
+      return (
+        <div className="bg-background border rounded-lg p-8 min-h-[200px] flex items-center justify-center">
+          <div className="text-center">
+            <LoadingSpinner size={32} className="mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading file content...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="bg-background border rounded-lg p-8 min-h-[200px] flex items-center justify-center">
+          <div className="text-center text-red-600">
+            <FilePdf className="h-12 w-12 mx-auto mb-2" />
+            <p>Failed to load file</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!content) {
+      return (
+        <div className="bg-background border rounded-lg p-8 min-h-[200px] flex items-center justify-center">
+          <div className="text-center text-muted-foreground">
+            <FilePdf className="h-12 w-12 mx-auto mb-2" />
+            <p>Preview not available</p>
+            <p className="text-sm">This file type cannot be previewed</p>
+          </div>
+        </div>
+      );
+    }
+
+    const mimeType = file.mimeType || '';
+    
+    // Image files
+    if (mimeType.startsWith('image/')) {
+      return (
+        <div className="bg-background border rounded-lg p-4 min-h-[200px]">
+          <img 
+            src={content} 
+            alt={file.originalName || file.name || 'Image preview'}
+            className="max-w-full max-h-[400px] object-contain mx-auto rounded"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+          <div className="hidden text-center text-muted-foreground">
+            <FilePdf className="h-12 w-12 mx-auto mb-2" />
+            <p>Failed to load image</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // PDF files
+    if (mimeType === 'application/pdf') {
+      return (
+        <div className="bg-background border rounded-lg p-4 min-h-[200px]">
+          <iframe 
+            src={content}
+            className="w-full h-[400px] border-0 rounded"
+            title={file.originalName || file.name || 'PDF preview'}
+          />
+        </div>
+      );
+    }
+    
+    // Text files
+    if (mimeType.startsWith('text/') || mimeType.includes('json') || mimeType.includes('xml')) {
+      return (
+        <div className="bg-background border rounded-lg p-4 min-h-[200px]">
+          <pre className="whitespace-pre-wrap text-sm overflow-auto max-h-[400px] font-mono">
+            {content}
+          </pre>
+        </div>
+      );
+    }
+    
+    // Default fallback
+    return (
+      <div className="bg-background border rounded-lg p-8 min-h-[200px] flex items-center justify-center">
+        <div className="text-center text-muted-foreground">
+          <FilePdf className="h-12 w-12 mx-auto mb-2" />
+          <p>Preview not available</p>
+          <p className="text-sm">This file type cannot be previewed</p>
+        </div>
+      </div>
+    );
+  };
+
   const getFileIcon = (documentType: string) => {
     const type = documentType.toLowerCase();
     
@@ -422,7 +657,7 @@ const ViewProjectPage = () => {
   return (
     <ContentLayout 
       title={`Knowledge Base`}
-      showContextToggle={true}
+      showContextToggle={false}
       contextType="knowledge"
       className="pt-16"
     >
@@ -652,7 +887,11 @@ const ViewProjectPage = () => {
                           <span className="text-sm text-muted-foreground">
                             {formatDate(file.updatedAt)}
                           </span>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewFile(file)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm">
@@ -816,6 +1055,91 @@ const ViewProjectPage = () => {
            </div>
          </div>
        )}
+
+       {/* File Preview Sheet */}
+       <Sheet open={showFilePreview} onOpenChange={setShowFilePreview}>
+         <SheetContent side="right" className="w-[600px] sm:max-w-[600px]">
+           <SheetHeader>
+             <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                 {selectedFile && getFileIcon(selectedFile.metadata?.documentType || selectedFile.documentType || 'Unknown')}
+                 <SheetTitle>
+                   {selectedFile?.originalName || selectedFile?.name || 'File Preview'}
+                 </SheetTitle>
+               </div>
+               <Button 
+                 variant="outline" 
+                 size="sm"
+                 onClick={() => {
+                   if (selectedFile?.metadata?.originalUrl) {
+                     window.open(selectedFile.metadata.originalUrl, '_blank');
+                   }
+                 }}
+               >
+                 <Download className="h-4 w-4 mr-2" />
+                 Download
+               </Button>
+             </div>
+             <SheetDescription>
+               Preview and details for the selected file
+             </SheetDescription>
+           </SheetHeader>
+           
+           {selectedFile && (
+             <div className="flex flex-col h-full">
+               {/* File Content Preview */}
+               <div className="flex-1 overflow-auto p-4 border rounded-lg bg-muted/20">
+                 <div className="space-y-4">
+                   <div className="text-center py-8">
+                     <div className="bg-primary/10 p-4 rounded-lg inline-block mb-4">
+                       {getFileIcon(selectedFile.metadata?.documentType || selectedFile.documentType || 'Unknown')}
+                     </div>
+                     <h3 className="font-semibold text-lg mb-2">
+                       {selectedFile.originalName || selectedFile.name || 'Unknown File'}
+                     </h3>
+                     <p className="text-muted-foreground text-sm">
+                       {selectedFile.metadata?.documentType || selectedFile.documentType || 'Unknown Type'}
+                     </p>
+                     <p className="text-muted-foreground text-sm">
+                       {formatBytes(Number(selectedFile.fileSize || selectedFile.size || 0))}
+                     </p>
+                     {selectedFile.metadata?.pageCount || selectedFile.pageCount ? (
+                       <p className="text-muted-foreground text-sm">
+                         {selectedFile.metadata?.pageCount || selectedFile.pageCount} pages
+                       </p>
+                     ) : null}
+                   </div>
+                   
+                   {/* File content preview */}
+                   {renderFileContent(selectedFile, fileContent, fileContentLoading, fileContentError)}
+                 </div>
+               </div>
+               
+               {/* Summary Section */}
+               <div className="mt-4 p-4 border rounded-lg">
+                 <h4 className="font-semibold mb-2 flex items-center gap-2">
+                   <Tag className="h-4 w-4" />
+                   Summary
+                 </h4>
+                 <div className="text-muted-foreground text-sm">
+                   <p>Summary will be displayed here</p>
+                 </div>
+               </div>
+               
+               {/* Tags Section */}
+               <div className="mt-4 p-4 border rounded-lg">
+                 <h4 className="font-semibold mb-2 flex items-center gap-2">
+                   <Tag className="h-4 w-4" />
+                   Tags
+                 </h4>
+                 <div className="text-muted-foreground text-sm">
+                   <p>Tags will be displayed here</p>
+                 </div>
+               </div>
+             </div>
+           )}
+         </SheetContent>
+       </Sheet>
      </ContentLayout>
    );
  };
